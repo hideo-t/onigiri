@@ -1040,13 +1040,36 @@
         }
 
         function newGame() {
-            score = 0;
-            moves = 30;
-            selectedCell = null;
+            // Hide game over screen if visible
             document.getElementById('gameOver').style.display = 'none';
-            initBoard();
-            renderBoard();
-            updateScore();
+            
+            // Show splash screen with video
+            splashScreen.style.display = 'flex';
+            splashScreen.classList.remove('hide');
+            splashContent.style.display = 'none'; // Hide the start button and title
+            gameWrapper.classList.remove('active');
+            
+            // Reset and play video
+            splashVideo.currentTime = 0;
+            splashVideo.play();
+            
+            // After 1.5 seconds, transition to game
+            setTimeout(() => {
+                splashScreen.classList.add('hide');
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    splashContent.style.display = 'flex'; // Show content again for next time
+                    gameWrapper.classList.add('active');
+                    
+                    // Reset game state
+                    score = 0;
+                    moves = 30;
+                    selectedCell = null;
+                    initBoard();
+                    renderBoard();
+                    updateScore();
+                }, 500);
+            }, 1500);
         }
 
         initBoard();
