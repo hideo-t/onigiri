@@ -66,6 +66,7 @@
             align-items: center;
             z-index: 9999;
             transition: opacity 0.5s ease-out;
+            overflow: hidden;
         }
 
         .splash-screen.hide {
@@ -87,18 +88,26 @@
             z-index: 1;
             text-align: center;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
 
         .splash-title {
-            font-size: clamp(2.5em, 8vw, 4em);
+            font-size: clamp(2em, 10vw, 4em);
             font-weight: 800;
             color: white;
             text-shadow: 
                 0 0 20px rgba(255, 255, 255, 0.5),
                 0 0 40px rgba(255, 182, 185, 0.8),
                 3px 3px 10px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             animation: glow 2s ease-in-out infinite;
+            line-height: 1.2;
+            max-width: 90vw;
+            word-wrap: break-word;
         }
 
         @keyframes glow {
@@ -107,17 +116,18 @@
         }
 
         .splash-subtitle {
-            font-size: 1.2em;
+            font-size: clamp(1em, 4vw, 1.2em);
             color: white;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
             margin-bottom: 40px;
+            font-weight: 500;
         }
 
         .start-button {
             font-family: 'M PLUS Rounded 1c', sans-serif;
-            font-size: 1.5em;
+            font-size: clamp(1.2em, 5vw, 1.5em);
             font-weight: 700;
-            padding: 20px 60px;
+            padding: clamp(15px, 4vw, 20px) clamp(40px, 10vw, 60px);
             border: none;
             border-radius: 50px;
             background: white;
@@ -126,6 +136,10 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             animation: pulse 2s ease-in-out infinite;
+            max-width: 90vw;
+            white-space: nowrap;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         @keyframes pulse {
@@ -504,6 +518,42 @@
 
             .game-rules ul {
                 font-size: 0.8em;
+            }
+
+            .splash-title {
+                font-size: 2em;
+                margin-bottom: 10px;
+            }
+
+            .splash-subtitle {
+                font-size: 0.9em;
+                margin-bottom: 30px;
+            }
+
+            .start-button {
+                font-size: 1.2em;
+                padding: 15px 40px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .splash-title {
+                font-size: 1.8em;
+            }
+
+            .start-button {
+                font-size: 1.1em;
+                padding: 12px 35px;
+            }
+        }
+
+        @media (min-width: 401px) and (max-width: 600px) {
+            .splash-title {
+                font-size: 2.5em;
+            }
+
+            .splash-subtitle {
+                font-size: 1.1em;
             }
         }
 
