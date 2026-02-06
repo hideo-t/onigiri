@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>おにぎりパズル 🍙</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --peach: #FFB6B9;
+            --mint: #BAE1D1;
+            --cream: #FFF4E6;
+            --sunset: #FFAAA5;
+            --sky: #A8DADC;
+            --rice: #F8F8F8;
+        }
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--mint) 50%, var(--sky) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 182, 185, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(186, 225, 209, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(168, 218, 220, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 40px;
+            box-shadow: 
+                0 25px 60px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            max-width: 600px;
+            position: relative;
+            animation: floatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--peach), var(--sunset), var(--mint));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 10px rgba(255, 182, 185, 0.3);
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .score-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--peach) 0%, var(--sunset) 100%);
+            border-radius: 25px;
+            box-shadow: 0 8px 20px rgba(255, 182, 185, 0.3);
+        }
+
+        .score-item {
+            text-align: center;
+            color: white;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: 800;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            background: linear-gradient(135deg, var(--rice) 0%, var(--cream) 100%);
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.1) inset,
+                0 0 0 1px rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: white;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .cell:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .cell.selected {
+            background: linear-gradient(135deg, var(--mint), var(--sky));
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 0 4px rgba(186, 225, 209, 0.5);
+            animation: wiggle 0.3s ease-in-out infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: scale(1.1) rotate(5deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .cell img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            pointer-events: none;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .cell.matching {
+            animation: matchPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes matchPulse {
+            0% { transform: scale(1); }
+            50% { 
+                transform: scale(1.3) rotate(360deg);
+                background: linear-gradient(135deg, #FFD93D, #FFB6B9);
+            }
+            100% { 
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 1s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .new-game-btn {
+            background: linear-gradient(135deg, var(--peach), var(--sunset));
+            color: white;
+        }
+
+        .new-game-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 182, 185, 0.4);
+        }
+
+        .new-game-btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .hint-btn {
+            background: linear-gradient(135deg, var(--mint), var(--sky));
+            color: white;
+        }
+
+        .hint-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(186, 225, 209, 0.4);
+        }
+
+        .hint-btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .game-over-content {
+            background: white;
+            padding: 50px;
+            border-radius: 40px;
+            text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .game-over-content h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--peach), var(--mint));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .final-score {
+            font-size: 3em;
+            font-weight: 800;
+            color: var(--sunset);
+            margin: 20px 0;
+            text-shadow: 2px 2px 10px rgba(255, 182, 185, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .game-board {
+                gap: 6px;
+                padding: 15px;
+            }
+            
+            button {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🍙 おにぎりパズル 🍙</h1>
+        </div>
+        
+        <div class="score-container">
+            <div class="score-item">
+                <div class="score-label">スコア</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">手数</div>
+                <div class="score-value" id="moves">30</div>
+            </div>
+        </div>
+        
+        <div class="game-board" id="gameBoard"></div>
+        
+        <div class="buttons">
+            <button class="new-game-btn" onclick="newGame()">新しいゲーム</button>
+            <button class="hint-btn" onclick="showHint()">ヒント</button>
+        </div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <div class="game-over-content">
+            <h2>ゲーム終了！</h2>
+            <div class="final-score" id="finalScore">0</div>
+            <button class="new-game-btn" onclick="newGame()">もう一度プレイ</button>
+        </div>
+    </div>
+
+    <script>
+        const BOARD_SIZE = 7;
+        const TYPES = ['square', 'triangle', 'round'];
+        const IMAGES = {
+            square: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+            triangle: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+            round: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+        };
+
+        let board = [];
+        let selectedCell = null;
+        let score = 0;
+        let moves = 30;
+        let isAnimating = false;
+
+        function initBoard() {
+            board = [];
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                board[i] = [];
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    board[i][j] = TYPES[Math.floor(Math.random() * TYPES.length)];
+                }
+            }
+            
+            // Remove initial matches
+            let hasMatches = true;
+            while (hasMatches) {
+                hasMatches = false;
+                for (let i = 0; i < BOARD_SIZE; i++) {
+                    for (let j = 0; j < BOARD_SIZE; j++) {
+                        if (checkMatch(i, j).length > 0) {
+                            board[i][j] = TYPES[Math.floor(Math.random() * TYPES.length)];
+                            hasMatches = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        function renderBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+            
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.onclick = () => handleCellClick(i, j);
+                    
+                    const img = document.createElement('img');
+                    const type = board[i][j];
+                    
+                    // Use actual uploaded images
+                    if (type === 'square') {
+                        img.src = '/mnt/user-data/uploads/shikakuoni.png';
+                    } else if (type === 'triangle') {
+                        img.src = '/mnt/user-data/uploads/sankakuonigiri.png';
+                    } else {
+                        img.src = '/mnt/user-data/uploads/maruonigiri.png';
+                    }
+                    
+                    cell.appendChild(img);
+                    gameBoard.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellClick(row, col) {
+            if (isAnimating) return;
+            
+            if (selectedCell === null) {
+                selectedCell = { row, col };
+                document.querySelector(`[data-row="${row}"][data-col="${col}"]`).classList.add('selected');
+            } else {
+                const cell = document.querySelector(`[data-row="${selectedCell.row}"][data-col="${selectedCell.col}"]`);
+                cell.classList.remove('selected');
+                
+                if (isAdjacent(selectedCell.row, selectedCell.col, row, col)) {
+                    swapCells(selectedCell.row, selectedCell.col, row, col);
+                }
+                
+                selectedCell = null;
+            }
+        }
+
+        function isAdjacent(row1, col1, row2, col2) {
+            return (Math.abs(row1 - row2) === 1 && col1 === col2) ||
+                   (Math.abs(col1 - col2) === 1 && row1 === row2);
+        }
+
+        async function swapCells(row1, col1, row2, col2) {
+            isAnimating = true;
+            
+            const temp = board[row1][col1];
+            board[row1][col1] = board[row2][col2];
+            board[row2][col2] = temp;
+            
+            renderBoard();
+            
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            const matches1 = checkMatch(row1, col1);
+            const matches2 = checkMatch(row2, col2);
+            
+            if (matches1.length > 0 || matches2.length > 0) {
+                moves--;
+                updateScore();
+                await processMatches();
+            } else {
+                // Swap back if no match
+                board[row2][col2] = board[row1][col1];
+                board[row1][col1] = temp;
+                renderBoard();
+            }
+            
+            isAnimating = false;
+            
+            if (moves <= 0) {
+                endGame();
+            }
+        }
+
+        function checkMatch(row, col) {
+            const type = board[row][col];
+            const matches = [{row, col}];
+            
+            // Check horizontal
+            let left = col - 1;
+            while (left >= 0 && board[row][left] === type) {
+                matches.push({row, col: left});
+                left--;
+            }
+            
+            let right = col + 1;
+            while (right < BOARD_SIZE && board[row][right] === type) {
+                matches.push({row, col: right});
+                right++;
+            }
+            
+            if (matches.length >= 3) return matches;
+            
+            // Check vertical
+            matches.length = 1;
+            let up = row - 1;
+            while (up >= 0 && board[up][col] === type) {
+                matches.push({row: up, col});
+                up--;
+            }
+            
+            let down = row + 1;
+            while (down < BOARD_SIZE && board[down][col] === type) {
+                matches.push({row: down, col});
+                down++;
+            }
+            
+            if (matches.length >= 3) return matches;
+            
+            return [];
+        }
+
+        async function processMatches() {
+            let allMatches = [];
+            
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    const matches = checkMatch(i, j);
+                    if (matches.length > 0) {
+                        matches.forEach(m => {
+                            if (!allMatches.some(am => am.row === m.row && am.col === m.col)) {
+                                allMatches.push(m);
+                            }
+                        });
+                    }
+                }
+            }
+            
+            if (allMatches.length > 0) {
+                score += allMatches.length * 10;
+                updateScore();
+                
+                // Animate matches
+                allMatches.forEach(m => {
+                    const cell = document.querySelector(`[data-row="${m.row}"][data-col="${m.col}"]`);
+                    if (cell) {
+                        cell.classList.add('matching');
+                        createParticles(cell);
+                    }
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 600));
+                
+                // Clear matched cells
+                allMatches.forEach(m => {
+                    board[m.row][m.col] = null;
+                });
+                
+                // Drop cells
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    let emptyRow = BOARD_SIZE - 1;
+                    for (let row = BOARD_SIZE - 1; row >= 0; row--) {
+                        if (board[row][col] !== null) {
+                            if (row !== emptyRow) {
+                                board[emptyRow][col] = board[row][col];
+                                board[row][col] = null;
+                            }
+                            emptyRow--;
+                        }
+                    }
+                }
+                
+                // Fill empty cells
+                for (let i = 0; i < BOARD_SIZE; i++) {
+                    for (let j = 0; j < BOARD_SIZE; j++) {
+                        if (board[i][j] === null) {
+                            board[i][j] = TYPES[Math.floor(Math.random() * TYPES.length)];
+                        }
+                    }
+                }
+                
+                renderBoard();
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Check for new matches
+                await processMatches();
+            }
+        }
+
+        function createParticles(cell) {
+            const rect = cell.getBoundingClientRect();
+            const colors = ['#FFB6B9', '#BAE1D1', '#FFAAA5', '#A8DADC', '#FFD93D'];
+            
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = rect.left + rect.width / 2 + 'px';
+                particle.style.top = rect.top + rect.height / 2 + 'px';
+                particle.style.setProperty('--tx', `${(Math.random() - 0.5) * 100}px`);
+                particle.style.setProperty('--ty', `${(Math.random() - 0.5) * 100}px`);
+                document.body.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('moves').textContent = moves;
+        }
+
+        function showHint() {
+            // Find a possible move
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    // Try swapping with right neighbor
+                    if (j < BOARD_SIZE - 1) {
+                        const temp = board[i][j];
+                        board[i][j] = board[i][j + 1];
+                        board[i][j + 1] = temp;
+                        
+                        if (checkMatch(i, j).length > 0 || checkMatch(i, j + 1).length > 0) {
+                            // Swap back and highlight
+                            board[i][j + 1] = board[i][j];
+                            board[i][j] = temp;
+                            
+                            const cell1 = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                            const cell2 = document.querySelector(`[data-row="${i}"][data-col="${j + 1}"]`);
+                            
+                            cell1.style.background = 'linear-gradient(135deg, #FFD93D, #FFB6B9)';
+                            cell2.style.background = 'linear-gradient(135deg, #FFD93D, #FFB6B9)';
+                            
+                            setTimeout(() => {
+                                cell1.style.background = '';
+                                cell2.style.background = '';
+                            }, 2000);
+                            
+                            return;
+                        }
+                        
+                        // Swap back
+                        board[i][j + 1] = board[i][j];
+                        board[i][j] = temp;
+                    }
+                    
+                    // Try swapping with bottom neighbor
+                    if (i < BOARD_SIZE - 1) {
+                        const temp = board[i][j];
+                        board[i][j] = board[i + 1][j];
+                        board[i + 1][j] = temp;
+                        
+                        if (checkMatch(i, j).length > 0 || checkMatch(i + 1, j).length > 0) {
+                            // Swap back and highlight
+                            board[i + 1][j] = board[i][j];
+                            board[i][j] = temp;
+                            
+                            const cell1 = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                            const cell2 = document.querySelector(`[data-row="${i + 1}"][data-col="${j}"]`);
+                            
+                            cell1.style.background = 'linear-gradient(135deg, #FFD93D, #FFB6B9)';
+                            cell2.style.background = 'linear-gradient(135deg, #FFD93D, #FFB6B9)';
+                            
+                            setTimeout(() => {
+                                cell1.style.background = '';
+                                cell2.style.background = '';
+                            }, 2000);
+                            
+                            return;
+                        }
+                        
+                        // Swap back
+                        board[i + 1][j] = board[i][j];
+                        board[i][j] = temp;
+                    }
+                }
+            }
+        }
+
+        function endGame() {
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOver').style.display = 'flex';
+        }
+
+        function newGame() {
+            score = 0;
+            moves = 30;
+            selectedCell = null;
+            document.getElementById('gameOver').style.display = 'none';
+            initBoard();
+            renderBoard();
+            updateScore();
+        }
+
+        // Initialize game
+        newGame();
+    </script>
+</body>
+</html>
