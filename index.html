@@ -527,6 +527,11 @@
         </div>
     </div>
 
+    <!-- Background Music -->
+    <audio id="bgm" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+
     <!-- Game Screen -->
     <div class="game-wrapper" id="gameWrapper">
         <div class="game-container">
@@ -581,11 +586,35 @@
         let moves = 30;
         let isAnimating = false;
 
+        // BGM Control
+        const bgm = document.getElementById('bgm');
+        bgm.volume = 0.4; // Set BGM volume to 40%
+        let bgmOriginalVolume = 0.4;
+        let isDucking = false;
+
+        // Duck BGM (lower volume) when sound effects play
+        function duckBGM() {
+            if (!isDucking) {
+                isDucking = true;
+                bgm.volume = 0.1; // Lower BGM volume to 10%
+            }
+        }
+
+        // Restore BGM volume after sound effect
+        function restoreBGM() {
+            setTimeout(() => {
+                isDucking = false;
+                bgm.volume = bgmOriginalVolume;
+            }, 300); // Restore after 300ms
+        }
+
         // Audio Context for sound effects
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-        // Sound Effects
+        // Sound Effects with BGM ducking
         function playSelectSound() {
+            duckBGM();
+            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
@@ -600,9 +629,13 @@
             
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.1);
+            
+            restoreBGM();
         }
 
         function playSwapSound() {
+            duckBGM();
+            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
@@ -618,9 +651,13 @@
             
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.15);
+            
+            restoreBGM();
         }
 
         function playMatchSound() {
+            duckBGM();
+            
             // Create a cheerful "pop" sound
             const oscillator1 = audioContext.createOscillator();
             const oscillator2 = audioContext.createOscillator();
@@ -647,9 +684,13 @@
             oscillator1.stop(audioContext.currentTime + 0.3);
             oscillator2.start(audioContext.currentTime);
             oscillator2.stop(audioContext.currentTime + 0.3);
+            
+            setTimeout(restoreBGM, 350);
         }
 
         function playComboSound(comboCount) {
+            duckBGM();
+            
             // Play ascending notes for combo
             const baseFreq = 800;
             const oscillator = audioContext.createOscillator();
@@ -666,9 +707,13 @@
             
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.2);
+            
+            setTimeout(restoreBGM, 250);
         }
 
         function playGameOverSound() {
+            duckBGM();
+            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
@@ -684,6 +729,8 @@
             
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.5);
+            
+            setTimeout(restoreBGM, 550);
         }
 
         // Splash Screen Logic
@@ -699,6 +746,9 @@
                 audioContext.resume();
             }
             
+            // Start BGM
+            bgm.play().catch(e => console.log('BGM autoplay prevented:', e));
+            
             // Play a cheerful start sound
             playSelectSound();
             
@@ -711,6 +761,7 @@
                 splashScreen.classList.add('hide');
                 setTimeout(() => {
                     splashScreen.style.display = 'none';
+                    splashContent.style.display = 'flex'; // Show content again for next time
                     gameWrapper.classList.add('active');
                 }, 500);
             }, 3000);
