@@ -96,7 +96,7 @@
         }
 
         .splash-title {
-            font-size: clamp(2em, 10vw, 4em);
+            font-size: clamp(1.5em, 8vw, 4em);
             font-weight: 800;
             color: white;
             text-shadow: 
@@ -106,8 +106,8 @@
             margin-bottom: 15px;
             animation: glow 2s ease-in-out infinite;
             line-height: 1.2;
-            max-width: 90vw;
-            word-wrap: break-word;
+            max-width: 95vw;
+            letter-spacing: -0.02em;
         }
 
         @keyframes glow {
@@ -597,8 +597,9 @@
             }
 
             .splash-title {
-                font-size: 2em;
+                font-size: 1.5em;
                 margin-bottom: 10px;
+                letter-spacing: -0.03em;
             }
 
             .splash-subtitle {
@@ -629,12 +630,19 @@
 
         @media (max-width: 360px) {
             .splash-title {
-                font-size: 1.8em;
+                font-size: 1.3em;
+                letter-spacing: -0.04em;
             }
 
             .start-button {
                 font-size: 1.1em;
                 padding: 12px 35px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .splash-title {
+                font-size: 1.2em;
             }
         }
 
