@@ -148,6 +148,21 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
+        .cell.type-square {
+            background: linear-gradient(135deg, #FFE5E7 0%, #FFD0D3 100%);
+            border: 3px solid var(--peach);
+        }
+
+        .cell.type-triangle {
+            background: linear-gradient(135deg, #E0F5ED 0%, #C8EFE0 100%);
+            border: 3px solid var(--mint);
+        }
+
+        .cell.type-round {
+            background: linear-gradient(135deg, #E3F4F6 0%, #C8E9ED 100%);
+            border: 3px solid var(--sky);
+        }
+
         .cell:hover {
             transform: scale(1.05) translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
@@ -413,13 +428,13 @@
             for (let i = 0; i < BOARD_SIZE; i++) {
                 for (let j = 0; j < BOARD_SIZE; j++) {
                     const cell = document.createElement('div');
-                    cell.className = 'cell';
+                    const type = board[i][j];
+                    cell.className = `cell type-${type}`;
                     cell.dataset.row = i;
                     cell.dataset.col = j;
                     cell.onclick = () => handleCellClick(i, j);
                     
                     const img = document.createElement('img');
-                    const type = board[i][j];
                     
                     // Use actual uploaded images
                     if (type === 'square') {
