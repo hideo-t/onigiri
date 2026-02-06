@@ -581,6 +581,111 @@
         let moves = 30;
         let isAnimating = false;
 
+        // Audio Context for sound effects
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Sound Effects
+        function playSelectSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        function playSwapSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.15);
+            oscillator.type = 'triangle';
+            
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.15);
+        }
+
+        function playMatchSound() {
+            // Create a cheerful "pop" sound
+            const oscillator1 = audioContext.createOscillator();
+            const oscillator2 = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator1.connect(gainNode);
+            oscillator2.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator1.frequency.setValueAtTime(1200, audioContext.currentTime);
+            oscillator1.frequency.exponentialRampToValueAtTime(1600, audioContext.currentTime + 0.05);
+            oscillator1.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
+            oscillator1.type = 'sine';
+            
+            oscillator2.frequency.setValueAtTime(1400, audioContext.currentTime);
+            oscillator2.frequency.exponentialRampToValueAtTime(1800, audioContext.currentTime + 0.05);
+            oscillator2.frequency.exponentialRampToValueAtTime(120, audioContext.currentTime + 0.3);
+            oscillator2.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator1.start(audioContext.currentTime);
+            oscillator1.stop(audioContext.currentTime + 0.3);
+            oscillator2.start(audioContext.currentTime);
+            oscillator2.stop(audioContext.currentTime + 0.3);
+        }
+
+        function playComboSound(comboCount) {
+            // Play ascending notes for combo
+            const baseFreq = 800;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = baseFreq + (comboCount * 200);
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        function playGameOverSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.5);
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
         // Splash Screen Logic
         const splashScreen = document.getElementById('splashScreen');
         const splashVideo = document.getElementById('splashVideo');
@@ -589,6 +694,14 @@
         const splashContent = document.getElementById('splashContent');
 
         startButton.addEventListener('click', function() {
+            // Resume audio context (required for iOS)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            // Play a cheerful start sound
+            playSelectSound();
+            
             // Play video
             splashVideo.play();
             startButton.style.display = 'none';
@@ -671,6 +784,7 @@
             if (isAnimating) return;
             
             if (selectedCell === null) {
+                playSelectSound();
                 selectedCell = { row, col };
                 document.querySelector(`[data-row="${row}"][data-col="${col}"]`).classList.add('selected');
             } else {
@@ -678,7 +792,10 @@
                 cell.classList.remove('selected');
                 
                 if (isAdjacent(selectedCell.row, selectedCell.col, row, col)) {
+                    playSwapSound();
                     swapCells(selectedCell.row, selectedCell.col, row, col);
+                } else {
+                    playSelectSound();
                 }
                 
                 selectedCell = null;
@@ -774,6 +891,14 @@
             }
             
             if (allMatches.length > 0) {
+                // Play match sound
+                playMatchSound();
+                
+                // Play combo sound if more than 3 matches
+                if (allMatches.length > 3) {
+                    setTimeout(() => playComboSound(Math.floor(allMatches.length / 3)), 100);
+                }
+                
                 score += allMatches.length * 10;
                 updateScore();
                 
@@ -854,6 +979,9 @@
                             board[i][j + 1] = board[i][j];
                             board[i][j] = temp;
                             
+                            // Play hint sound
+                            playComboSound(2);
+                            
                             const cell1 = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
                             const cell2 = document.querySelector(`[data-row="${i}"][data-col="${j + 1}"]`);
                             
@@ -881,6 +1009,9 @@
                             board[i + 1][j] = board[i][j];
                             board[i][j] = temp;
                             
+                            // Play hint sound
+                            playComboSound(2);
+                            
                             const cell1 = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
                             const cell2 = document.querySelector(`[data-row="${i + 1}"][data-col="${j}"]`);
                             
@@ -903,6 +1034,7 @@
         }
 
         function endGame() {
+            playGameOverSound();
             document.getElementById('finalScore').textContent = score;
             document.getElementById('gameOver').style.display = 'flex';
         }
