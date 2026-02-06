@@ -123,6 +123,53 @@
             font-weight: 500;
         }
 
+        .onigiri-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(15px, 5vw, 30px);
+            margin-top: 30px;
+            animation: onigiriFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes onigiriFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .onigiri-row img {
+            width: clamp(50px, 15vw, 80px);
+            height: clamp(50px, 15vw, 80px);
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            animation: onigiriWiggle 2s ease-in-out infinite;
+        }
+
+        .onigiri-row img:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .onigiri-row img:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .onigiri-row img:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes onigiriWiggle {
+            0%, 100% {
+                transform: rotate(-5deg) scale(1);
+            }
+            50% {
+                transform: rotate(5deg) scale(1.1);
+            }
+        }
+
         .start-button {
             font-family: 'M PLUS Rounded 1c', sans-serif;
             font-size: clamp(1.2em, 5vw, 1.5em);
@@ -612,6 +659,16 @@
                 padding: 15px 40px;
             }
 
+            .onigiri-row {
+                gap: 12px;
+                margin-top: 20px;
+            }
+
+            .onigiri-row img {
+                width: 50px;
+                height: 50px;
+            }
+
             .combo-counter {
                 font-size: 0.8em;
                 padding: 6px 12px;
@@ -638,11 +695,26 @@
                 font-size: 1.1em;
                 padding: 12px 35px;
             }
+
+            .onigiri-row {
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .onigiri-row img {
+                width: 45px;
+                height: 45px;
+            }
         }
 
         @media (max-width: 320px) {
             .splash-title {
                 font-size: 1.2em;
+            }
+
+            .onigiri-row img {
+                width: 40px;
+                height: 40px;
             }
         }
 
@@ -673,6 +745,11 @@
             <div class="splash-title">🍙 おにぎりハート 🍙</div>
             <div class="splash-subtitle">by Yumiko.T.</div>
             <button class="start-button" id="startButton">スタート</button>
+            <div class="onigiri-row">
+                <img src="shikakuoni.png" alt="四角おにぎり">
+                <img src="sankakuonigiri.png" alt="三角おにぎり">
+                <img src="maruonigiri.png" alt="丸おにぎり">
+            </div>
         </div>
     </div>
 
